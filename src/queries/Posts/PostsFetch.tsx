@@ -2,12 +2,17 @@ import React, {useState} from 'react';
 import {useQuery} from "react-query";
 import axios from "axios";
 import {queryClient} from "../../App";
+import {Routes, Route, useParams, NavLink} from "react-router-dom";
 
-// @ts-ignore
-const Posts = ({ setPostId }) => {
+const Posts = () => {
     const posts = useQuery('posts', () => {
         return axios.get('https://jsonplaceholder.typicode.com/posts')
             .then(r => r.data);
+    }, {
+        cacheTime: 10000000,
+        onSuccess: data => console.log(data),
+        onError: e => console.log(e),
+        onSettled: (data, error) => console.log(data, error),
     })
 
     return (
@@ -17,7 +22,7 @@ const Posts = ({ setPostId }) => {
                 {posts.isLoading ? 'loading posts...' :
                 <div>{
                     posts.data.map((p: { id: React.Key | null | undefined; title: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined; }) => <div key={p.id}>
-                        <a href="#" onClick={() => setPostId(p.id)}>{p.title}</a>
+                        <NavLink to={`/${p.id}`}>{p.title}</NavLink>
                     </div>)
                 }</div>
                 }
@@ -26,8 +31,8 @@ const Posts = ({ setPostId }) => {
     );
 };
 
-// @ts-ignore
-const Post = ({ id, setPostId }) => {
+const Post = () => {
+    const { id } = useParams();
     const post = useQuery(['post', id], () => {
         return axios.get(`https://jsonplaceholder.typicode.com/posts/${id}`)
             .then(r => r.data);
@@ -37,18 +42,18 @@ const Post = ({ id, setPostId }) => {
     })
 
     return <div>
-        <a href="#" onClick={() => setPostId(null)}>back</a>
+        <NavLink to='/'>back</NavLink>
         <div>post</div>
         <pre>{JSON.stringify(post.data, null, 2)}</pre>
     </div>
 }
 
 const PostsFetch = () => {
-    const [postId, setPostId] = useState(null);
     return (
-        <div>
-            {!postId ? <Posts setPostId={setPostId} /> : <Post id={postId} setPostId={setPostId} />}
-        </div>
+        <Routes>
+            <Route path={'/:id'} element={<Post />} />
+            <Route path={'/'} element={<Posts />} />
+        </Routes>
     );
 };
 
