@@ -10,7 +10,7 @@ export class QueryClient {
 
     unMount(): void {}
 
-    getObserver(): Observer | null {
-        return this.observer;
+    getObserver(): Observer {
+        return <Observer>this.observer;
     }
 }

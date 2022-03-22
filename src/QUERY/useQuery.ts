@@ -34,14 +34,13 @@ export type QueryFunction<T = unknown,
 
 export interface Options {
     enabled: boolean;
+    debounce?: number;
+    retry?: number;
 }
 
 const checkArray = (queryKey: Array<string> | string) => Array.isArray(queryKey) ? queryKey[1] : queryKey;
 
-export function useQuery<TQueryFnData,
-    TError,
-    TData = TQueryFnData,
-    >(
+export function useQuery(
     TQueryKey: Array<string> | string,
     asyncFn: () => Promise<any>,
     options: Options,
@@ -64,11 +63,12 @@ export function useQuery<TQueryFnData,
     useEffect(() => {
         (async () => {
             try {
-                if (!options.enabled) return;
+                if (!observer.shouldLoadOnMount(options)) return;
 
-                observer?.add(checkArray(TQueryKey), asyncFn);
+                observer.add(checkArray(TQueryKey), asyncFn, options);
                 setStatus('loading');
-                const response = await observer?.getQuery(checkArray(TQueryKey)).asyncFn();
+                const response = await observer.toCallQuery(checkArray(TQueryKey), options);
+                console.info('!!')
                 console.info('response', response)
                 setPayload(response);
                 setStatus('success');

@@ -8,7 +8,9 @@ const InputSearch = () => {
     const query = useQuery(['pokemon', pokemon], () => {
         return axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`).then(r => r.data);
     }, {
-        enabled: !!pokemon
+        enabled: !!pokemon,
+        debounce: 1000,
+        retry: 3
     });
     // const query = useQuery(['pokemon', pokemon],
     //     () => {
@@ -32,8 +34,6 @@ const InputSearch = () => {
     //     retry: 0,
     //     enabled: !!pokemon
     // });
-
-    console.info(query.data);
 
     return (
         <div>
